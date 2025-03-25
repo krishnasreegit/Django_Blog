@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Dashboard Overview</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Blogs
+                            <span class="badge bg-primary rounded-pill">{{ total_blogs }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Likes
+                            <span class="badge bg-success rounded-pill">{{ total_likes }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Comments
+                            <span class="badge bg-info rounded-pill">{{ total_comments }}</span>
+                        </li>
+                    </ul>
+                    <div class="mt-3">
+                        <a href="{% url 'blog-create' %}" class="btn btn-primary w-100">Create New Blog</a>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-primary w-100 mt-2">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Blog Posts</h5>
+                </div>
+                <div class="card-body">
+                    {% if blogs %}
+                        {% for blog in blogs %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ blog.title }}</h5>
+                                    <p class="card-text text-muted">
+                                        Posted on {{ blog.post_date|date:"F d, Y" }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <a href="{% url 'blog-detail' blog.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{% url 'blog-update' blog.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <a href="{% url 'blog-delete' blog.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ blog.total_likes }} likes
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center">You haven't written any blog posts yet.</p>
+                        <div class="text-center">
+                            <a href="{% url 'blog-create' %}" class="btn btn-primary">Create Your First Blog</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

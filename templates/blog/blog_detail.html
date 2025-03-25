@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="card-title">{{ blog.title }}</h1>
+        <h6 class="card-subtitle mb-3 text-muted">
+            By {% if blog.author.blogauthor %}
+                <a href="{% url 'blogger-detail' blog.author.blogauthor.pk %}" class="text-decoration-none">{{ blog.author.username }}</a>
+            {% else %}
+                {{ blog.author.username }}
+            {% endif %}
+            on {{ blog.post_date|date:"F j, Y" }}
+        </h6>
+        
+        {% if blog.description %}
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                <p class="card-text lead">{{ blog.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <p class="card-text">{{ blog.content|linebreaks }}</p>
+        
+        <div class="d-flex align-items-center">
+            {% if user.is_authenticated %}
+            <button class="btn {% if is_liked %}btn-danger{% else %}btn-outline-danger{% endif %} me-2" 
+                    id="likeButton" 
+                    data-blog-id="{{ blog.pk }}"
+                    data-csrf="{{ csrf_token }}"
+                    onclick="handleLike(event)">
+                <i class="fas fa-heart"></i> 
+                <span id="likeCount">{{ blog.likes.count }}</span>
+            </button>
+            {% else %}
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-danger me-2">
+                <i class="fas fa-heart"></i> {{ blog.likes.count }}
+            </a>
+            {% endif %}
+            <span class="text-muted">
+                <i class="fas fa-comment"></i> {{ comments|length }} Comments
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Comments</h5>
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add-comment' blog.pk %}">
+                {% csrf_token %}
+                {{ comment_form|crispy }}
+                <button type="submit" class="btn btn-primary">Add Comment</button>
+            </form>
+        {% else %}
+            <p class="text-muted">Please <a href="{% url 'login' %}">login</a> to leave a comment.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if comments %}
+<div class="card">
+    <div class="card-body">
+        {% for comment in comments %}
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-1">
+                    {% if comment.author.blogauthor %}
+                        <a href="{% url 'blogger-detail' comment.author.blogauthor.pk %}" class="text-decoration-none">{{ comment.author.username }}</a>
+                    {% else %}
+                        {{ comment.author.username }}
+                    {% endif %}
+                </h6>
+                <small class="text-muted">{{ comment.post_date|date:"F j, Y" }}</small>
+            </div>
+            <p class="mb-1">{{ comment.content }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function handleLike(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const blogId = button.dataset.blogId;
+    const csrfToken = button.dataset.csrf;
+    const likeCount = button.querySelector('#likeCount');
+    
+    // Disable button during request
+    button.disabled = true;
+    
+    fetch(`/blog/${blogId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Update like count
+        likeCount.textContent = data.total_likes;
+        
+        // Update button appearance
+        if (data.liked) {
+            button.classList.remove('btn-outline-danger');
+            button.classList.add('btn-danger');
+        } else {
+            button.classList.remove('btn-danger');
+            button.classList.add('btn-outline-danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating like status. Please try again.');
+    })
+    .finally(() => {
+        // Re-enable button after request completes
+        button.disabled = false;
+    });
+}
+
+// Log when the script loads
+console.log('Like button script loaded');
+</script>
+{% endblock %}

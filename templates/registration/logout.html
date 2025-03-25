@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Logout Confirmation</h2>
+                    <p class="card-text">Are you sure you want to logout?</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <form method="post" action="{% url 'logout' %}" class="me-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.GET.next }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Yes, Logout
+                            </button>
+                        </form>
+                        <a href="{% url 'index' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if blogauthor.profile_picture %}
+                        <img src="{{ blogauthor.profile_picture.url }}" alt="{{ blogauthor.user.username }}" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle mx-auto mb-3 bg-secondary d-flex align-items-center justify-content-center"
+                             style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <h3 class="card-title">{{ blogauthor.user.username }}</h3>
+                    {% if blogauthor.bio %}
+                        <p class="card-text">{{ blogauthor.bio }}</p>
+                    {% else %}
+                        <p class="text-muted">No bio available</p>
+                    {% endif %}
+                    <p class="text-muted">
+                        <i class="fas fa-calendar-alt"></i> Member since {{ blogauthor.user.date_joined|date:"F j, Y" }}
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ blog_list|length }}</h5>
+                            <small class="text-muted">Posts</small>
+                        </div>
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ total_likes }}</h5>
+                            <small class="text-muted">Likes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h2 class="mb-4">Blog Posts by {{ blogauthor.user.username }}</h2>
+            {% if blog_list %}
+                {% for blog in blog_list %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{{ blog.get_absolute_url }}" class="text-decoration-none">{{ blog.title }}</a>
+                        </h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Posted on {{ blog.post_date|date:"F j, Y" }}
+                        </h6>
+                        {% if blog.description %}
+                            <p class="card-text">{{ blog.description|truncatewords:30 }}</p>
+                        {% else %}
+                            <p class="card-text">{{ blog.content|truncatewords:30 }}</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ blog.get_absolute_url }}" class="btn btn-outline-primary">Read More</a>
+                            <div>
+                                <span class="text-danger me-3">
+                                    <i class="fas fa-heart"></i> {{ blog.likes.count }}
+                                </span>
+                                <span class="text-primary">
+                                    <i class="fas fa-comment"></i> {{ blog.comments.count }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-muted">No blog posts yet.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
