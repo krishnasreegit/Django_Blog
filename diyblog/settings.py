@@ -17,7 +17,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-ALLOWED_HOSTS = ['onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['onrender.com','localhost','127.0.0.1', 'django-blog-1vce.onrender.com']
 
 
 
